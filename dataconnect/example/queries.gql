@@ -1,0 +1,50 @@
+# 1. Query to retrieve all configurations for the current user
+query GetUserConfigurations @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  configurations(where: {user: {id_expr: "auth.uid"}}) {
+    id
+    isActive
+    notificationPreference
+    defaultBlockDuration
+    createdAt
+    updatedAt
+  }
+}
+
+# 2. Mutation to insert a new BlockedProject for the current user
+mutation CreateBlockedProject($projectId: String!, $description: String, $blockedUntil: Timestamp) @auth(level: USER) {
+  blockedProject_insert(data: {
+    projectId: $projectId,
+    description: $description,
+    blockedUntil: $blockedUntil,
+    userId_expr: "auth.uid",
+    createdAt_expr: "request.time"
+  })
+}
+
+# 3. Query to get all BlockedProjects for the current user, ordered by creation date
+query GetUserBlockedProjects @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  blockedProjects(
+    where: {user: {id_expr: "auth.uid"}},
+    orderBy: [{createdAt: DESC}]
+  ) {
+    id
+    projectId
+    description
+    createdAt
+    blockedUntil
+  }
+}
+
+# 4. Mutation to update a specific Configuration for the current user
+mutation UpdateUserConfiguration($id: UUID!, $isActive: Boolean, $notificationPreference: String, $defaultBlockDuration: Int64) @auth(level: USER) {
+  configuration_update(
+    key: {id: $id},
+    data: {
+      isActive: $isActive,
+      notificationPreference: $notificationPreference,
+      defaultBlockDuration: $defaultBlockDuration,
+      updatedAt_expr: "request.time"
+    },
+    where: {userId_expr: "auth.uid"} # Ensure only the current user can update their configuration
+  )
+}

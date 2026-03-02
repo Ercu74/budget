@@ -1,0 +1,31 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+}
+
+type BlockedProject @table {
+  user: User
+  projectId: String!
+  createdAt: Timestamp!
+  description: String
+  blockedUntil: Timestamp
+}
+
+type BlockEvent @table {
+  user: User
+  blockedProject: BlockedProject
+  timestamp: Timestamp!
+  eventType: String!
+  details: String
+}
+
+type Configuration @table {
+  user: User
+  isActive: Boolean!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  notificationPreference: String
+  defaultBlockDuration: Int64
+}

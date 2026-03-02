@@ -1,0 +1,68 @@
+mutation CreateDemoData @transaction @auth(level: PUBLIC, insecureReason: "This is seed data and can be exposed to the public.") {
+  user_insertMany(data: [
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      displayName: "Alice",
+      createdAt: "2023-01-01T10:00:00Z",
+      email: "alice@example.com",
+      photoUrl: "http://example.com/alice.jpg"
+    },
+    {
+      id: "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      displayName: "Bob",
+      createdAt: "2023-01-02T11:00:00Z",
+      email: "bob@example.com",
+      photoUrl: "http://example.com/bob.jpg"
+    }
+  ])
+  blockedProject_insertMany(data: [
+    {
+      id: "c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      projectId: "projectA",
+      createdAt: "2023-01-05T12:00:00Z",
+      description: "Alice blocked Project A",
+      blockedUntil: "2023-01-10T00:00:00Z"
+    },
+    {
+      id: "d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+      userId: "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      projectId: "projectB",
+      createdAt: "2023-01-06T13:00:00Z",
+      description: "Bob blocked Project B"
+    }
+  ])
+  blockEvent_insertMany(data: [
+    {
+      blockedProjectId: "c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      timestamp: "2023-01-05T12:01:00Z",
+      eventType: "BLOCKED",
+      details: "Initial block of Project A by Alice"
+    },
+    {
+      blockedProjectId: "d3eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+      userId: "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      timestamp: "2023-01-06T13:05:00Z",
+      eventType: "BLOCKED",
+      details: "Initial block of Project B by Bob"
+    }
+  ])
+  configuration_insertMany(data: [
+    {
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      isActive: true,
+      createdAt: "2023-01-01T10:00:00Z",
+      updatedAt: "2023-01-01T10:00:00Z",
+      notificationPreference: "EMAIL",
+      defaultBlockDuration: 86400000
+    },
+    {
+      userId: "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      isActive: false,
+      createdAt: "2023-01-02T11:00:00Z",
+      updatedAt: "2023-01-02T11:00:00Z",
+      notificationPreference: "NONE"
+    }
+  ])
+}

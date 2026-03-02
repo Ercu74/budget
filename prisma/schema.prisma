@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rolle {
+  ADMIN
+  VERMIETER
+  MIETER
+}
+
+enum MietobjektStatus {
+  FREI
+  VERMIETET
+  INSTANDHALTUNG
+}
+
+enum MietverhaeltnisStatus {
+  AKTIV
+  BEENDET
+  GEKUENDIGT
+}
+
+enum ZahlungStatus {
+  BEZAHLT
+  AUSSTEHEND
+  VERSPAETET
+}
+
+enum Zahlungsmethode {
+  BAR
+  UBERWEISUNG
+  LASTSCHRIFT
+}
+
+model Benutzer {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwort        String?
+  name            String?
+  rolle           Rolle     @default(MIETER)
+  bild            String?
+  telefon         String?
+  erstellDatum    DateTime  @default(now())
+  aktualisiert    DateTime  @updatedAt
+
+  vermieterMietverhaeltnisse Mietverhaeltnis[] @relation("Vermieter")
+  mieterMietverhaeltnisse    Mietverhaeltnis[] @relation("Mieter")
+  
+  zahlungen                  Zahlung[]
+  aktivitaetsLogs            AktivitaetsLog[]
+}
+
+model Mietobjekt {
+  id              String    @id @default(cuid())
+  adresse         String?
+  zimmer          Int?
+  flaeche         Float?
+  kaltMiete       Float?
+  nebenkosten     Float?
+  gesamtMiete     Float?
+  status          MietobjektStatus @default(FREI)
+  bemerkungen     String?
+  erstellDatum    DateTime  @default(now())
+  aktualisiert    DateTime  @updatedAt
+
+  mietverhaeltnisse Mietverhaeltnis[]
+}
+
+// 📌 YENİ MODEL: Dokümanlar (çoklu PDF desteği)
+model Dokument {
+  id                  String    @id @default(cuid())
+  mietverhaeltnisId   String
+  mietverhaeltnis     Mietverhaeltnis @relation(fields: [mietverhaeltnisId], references: [id])
+  name                String    // Orijinal dosya adı
+  url                 String    // /uploads/...
+  type                String?   // "Mietvertrag", "Uebergabeprotokoll" vb.
+  erstellDatum        DateTime  @default(now())
+  aktualisiert        DateTime  @updatedAt
+}
+
+model Mietverhaeltnis {
+  id              String    @id @default(cuid())
+  mietobjektId    String?
+  mietobjekt      Mietobjekt? @relation(fields: [mietobjektId], references: [id])
+  vermieterId     String?
+  vermieter       Benutzer?  @relation("Vermieter", fields: [vermieterId], references: [id])
+  mieterId        String?
+  mieter          Benutzer?  @relation("Mieter", fields: [mieterId], references: [id])
+  startDatum      DateTime?
+  endeDatum       DateTime?
+  kaution         Float?
+  status          MietverhaeltnisStatus @default(AKTIV)
+  vertragUrl      String?     // Eski alan (geriye uyumluluk için)
+  erstellDatum    DateTime  @default(now())
+  aktualisiert    DateTime  @updatedAt
+
+  zahlungen       Zahlung[]
+  // 📌 YENİ İLİŞKİ: Bu sözleşmeye ait tüm dokümanlar
+  dokumente       Dokument[]
+}
+
+model Zahlung {
+  id                  String    @id @default(cuid())
+  mietverhaeltnisId   String?
+  mietverhaeltnis     Mietverhaeltnis? @relation(fields: [mietverhaeltnisId], references: [id])
+  betrag              Float?
+  zahlungsdatum       DateTime?
+  methode             Zahlungsmethode?
+  status              ZahlungStatus @default(AUSSTEHEND)
+  bemerkungen         String?
+  erstellDatum        DateTime  @default(now())
+  aktualisiert        DateTime  @updatedAt
+
+  erstellerId         String?
+  ersteller           Benutzer?  @relation(fields: [erstellerId], references: [id])
+}
+
+model AktivitaetsLog {
+  id              String    @id @default(cuid())
+  benutzerId      String?
+  benutzer        Benutzer?  @relation(fields: [benutzerId], references: [id])
+  aktion          String?
+  details         String?
+  ipAdresse       String?
+  timestamp       DateTime  @default(now())
+}
