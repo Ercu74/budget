@@ -62,7 +62,7 @@ export default function KpiCards(props: DashboardProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
       {stats.map((item) => {
         const CardContent = (
           <div className={`relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-12 shadow sm:px-6 sm:pt-6 transition-all duration-200 ${item.href ? 'hover:bg-gray-50 hover:shadow-md cursor-pointer' : ''}`}>
